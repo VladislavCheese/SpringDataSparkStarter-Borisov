@@ -1,10 +1,10 @@
-package unsafe.starter.spark.data.filters.impl;
+package unsafe.starter.spark.data.transformations.filter;
 
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.functions;
 import org.springframework.stereotype.Component;
-import unsafe.starter.spark.data.filters.FilterSparkTransformation;
+import unsafe.starter.spark.data.OrderedBag;
 
 import java.util.List;
 

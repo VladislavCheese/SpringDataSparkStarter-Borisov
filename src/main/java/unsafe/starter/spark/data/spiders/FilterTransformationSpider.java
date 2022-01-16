@@ -1,11 +1,11 @@
-package unsafe.starter.spark.data;
+package unsafe.starter.spark.data.spiders;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import scala.Tuple2;
-import unsafe.starter.spark.data.filters.FilterSparkTransformation;
-import unsafe.starter.spark.data.filters.SparkTransformation;
-import unsafe.starter.spark.data.api.TransformationSpider;
+import unsafe.starter.spark.data.WordsMatcher;
+import unsafe.starter.spark.data.transformations.filter.FilterSparkTransformation;
+import unsafe.starter.spark.data.transformations.SparkTransformation;
 
 import java.util.List;
 import java.util.Map;
@@ -19,7 +19,6 @@ public class FilterTransformationSpider implements TransformationSpider {
 
     @Override
     public Tuple2<SparkTransformation,List<String>> createTransformation(List<String> remainingWords, Set<String> fieldNames) {
-        //todo исп поле
         String fieldName = WordsMatcher.findAndRemoveMatchingPiecesIfExists(fieldNames, remainingWords);
         String filterName = WordsMatcher.findAndRemoveMatchingPiecesIfExists(filterTransformation.keySet(), remainingWords);
         return new Tuple2<>(filterTransformation.get(filterName), List.of(fieldName));

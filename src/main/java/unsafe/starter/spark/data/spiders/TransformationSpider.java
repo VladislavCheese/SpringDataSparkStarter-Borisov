@@ -1,7 +1,7 @@
-package unsafe.starter.spark.data.api;
+package unsafe.starter.spark.data.spiders;
 
 import scala.Tuple2;
-import unsafe.starter.spark.data.filters.SparkTransformation;
+import unsafe.starter.spark.data.transformations.SparkTransformation;
 
 import java.util.List;
 import java.util.Set;

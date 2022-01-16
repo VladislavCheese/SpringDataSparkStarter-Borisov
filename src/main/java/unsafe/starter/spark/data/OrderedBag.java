@@ -1,4 +1,4 @@
-package unsafe.starter.spark.data.filters.impl;
+package unsafe.starter.spark.data;
 
 import java.util.LinkedList;
 import java.util.List;

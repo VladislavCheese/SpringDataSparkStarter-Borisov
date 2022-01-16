@@ -1,19 +1,20 @@
-package unsafe.starter.spark.data;
+package unsafe.starter.spark.data.ih;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 import scala.Tuple2;
+import unsafe.starter.spark.data.WordsMatcher;
 import unsafe.starter.spark.data.annotations.Source;
 import unsafe.starter.spark.data.annotations.Transient;
-import unsafe.starter.spark.data.finalizers.Finalizer;
-import unsafe.starter.spark.data.api.SparkInvocationHandler;
 import unsafe.starter.spark.data.api.SparkRepository;
-import unsafe.starter.spark.data.filters.SparkTransformation;
-import unsafe.starter.spark.data.api.TransformationSpider;
 import unsafe.starter.spark.data.extractors.DataExtractor;
 import unsafe.starter.spark.data.extractors.DataExtractorResolver;
+import unsafe.starter.spark.data.finalizers.Finalizer;
+import unsafe.starter.spark.data.lazy.collections.LazyCollectionSupportPostFinalizer;
+import unsafe.starter.spark.data.spiders.TransformationSpider;
+import unsafe.starter.spark.data.transformations.SparkTransformation;
 
 import java.beans.Introspector;
 import java.lang.reflect.Field;
@@ -50,12 +51,9 @@ public class SparkInvocationHandlerFactory {
 
         Set<String> fieldNames = getModelFieldNames(modelClass);
 
-
         Map<Method, List<Tuple2<SparkTransformation,List<String>>>> transformationChain = new HashMap<>();
         Map<Method, Finalizer> method2Finalizer = new HashMap<>();
-
-        Method[] methods = repoInterface.getMethods();
-        for (Method method : methods) {
+        for (Method method : repoInterface.getMethods()) {
             TransformationSpider currentSpider = null;
             List<Tuple2<SparkTransformation,List<String>>> transformations = new ArrayList<>();
 
@@ -73,8 +71,8 @@ public class SparkInvocationHandlerFactory {
             transformationChain.put(method, transformations);
 
 
-            //если слов не останется значит это дефолтный collect
             String finalizerName = "collect";
+            //если слов не останется значит это дефолтный collect
             if (methodWords.size() == 1) {
                 finalizerName = Introspector.decapitalize(methodWords.get(0));
             }
@@ -88,6 +86,7 @@ public class SparkInvocationHandlerFactory {
                 .dataExtractor(dataExtractor)
                 .transformationChain(transformationChain)
                 .finalizerMap(method2Finalizer)
+                .postFinalizer(new LazyCollectionSupportPostFinalizer(context))
                 .context(context)
                 .build();
     }

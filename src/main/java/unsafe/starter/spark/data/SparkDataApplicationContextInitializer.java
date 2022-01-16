@@ -1,12 +1,14 @@
 package unsafe.starter.spark.data;
 
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import unsafe.starter.spark.data.api.SparkRepository;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SparkSession;
 import org.reflections.Reflections;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import unsafe.starter.spark.data.api.SparkRepository;
+import unsafe.starter.spark.data.extractors.DataExtractorResolver;
+import unsafe.starter.spark.data.ih.SparkInvocationHandlerFactory;
 
 import java.beans.Introspector;
 import java.lang.reflect.Proxy;
@@ -17,7 +19,11 @@ public class SparkDataApplicationContextInitializer implements ApplicationContex
         //поднимем временный контекст для настройки бинов
         AnnotationConfigApplicationContext tempContext = new AnnotationConfigApplicationContext(InternalConfiguration.class);
         SparkInvocationHandlerFactory factory = tempContext.getBean(SparkInvocationHandlerFactory.class);
+
+        DataExtractorResolver extractorResolver = tempContext.getBean(DataExtractorResolver.class);
+        context.getBeanFactory().registerSingleton("extractorResolverForSpark", extractorResolver);
         tempContext.close();
+
         factory.setContext(context);
 
         registerSparkBeans(context);
@@ -37,7 +43,7 @@ public class SparkDataApplicationContextInitializer implements ApplicationContex
                 .appName(context.getEnvironment().getProperty("spark.app-name"))
                 .getOrCreate();
         JavaSparkContext sparkContext = new JavaSparkContext(sparkSession.sparkContext());
-        context.getBeanFactory().registerSingleton("sparkSession",sparkSession);
-        context.getBeanFactory().registerSingleton("sparkContext",sparkContext);
+        context.getBeanFactory().registerSingleton("sparkSession", sparkSession);
+        context.getBeanFactory().registerSingleton("sparkContext", sparkContext);
     }
 }
